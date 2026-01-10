@@ -15,7 +15,7 @@ O projeto consiste em dois microsserviços independentes que se comunicam de for
 |-----------|------------|
 | Framework | NestJS |
 | Linguagem | TypeScript |
-| ORM | Prisma |
+| ORM | Prisma 6 |
 | Validação | Zod |
 | Banco de Dados | PostgreSQL |
 | Cache | Redis |
