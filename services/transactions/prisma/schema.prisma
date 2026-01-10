@@ -1,0 +1,30 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Transaction {
+  id             String            @id @default(uuid())
+  senderUserId   String
+  receiverUserId String
+  amount         Int // Valor em centavos (R$ 10,50 = 1050)
+  description    String?
+  status         TransactionStatus @default(PENDING)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  @@index([senderUserId])
+  @@index([receiverUserId])
+  @@map("transactions")
+}
+
+enum TransactionStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
