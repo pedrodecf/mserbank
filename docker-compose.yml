@@ -1,4 +1,49 @@
 services:
+  # ==================== APPLICATIONS ====================
+  customers:
+    build:
+      context: ./services/customers
+      dockerfile: Dockerfile
+    container_name: mserbank-customers
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DATABASE_URL: postgresql://mserbank:mserbank123@postgres-customers:5432/customers?schema=public
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      RABBITMQ_URL: amqp://mserbank:mserbank123@rabbitmq:5672
+    ports:
+      - '3001:3001'
+    depends_on:
+      postgres-customers:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    profiles:
+      - full
+
+  transactions:
+    build:
+      context: ./services/transactions
+      dockerfile: Dockerfile
+    container_name: mserbank-transactions
+    environment:
+      NODE_ENV: production
+      PORT: 3002
+      DATABASE_URL: postgresql://mserbank:mserbank123@postgres-transactions:5432/transactions?schema=public
+      RABBITMQ_URL: amqp://mserbank:mserbank123@rabbitmq:5672
+    ports:
+      - '3002:3002'
+    depends_on:
+      postgres-transactions:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    profiles:
+      - full
+
   # ==================== DATABASES ====================
   postgres-customers:
     image: postgres:16-alpine
