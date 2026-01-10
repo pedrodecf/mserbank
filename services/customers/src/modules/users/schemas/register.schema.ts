@@ -1,7 +1,8 @@
 import { PASSWORD_REGEX } from 'src/common/constants/regex.constants';
 import { z } from 'zod';
 
-export const loginSchema = z.object({
+export const registerSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
   email: z.email('Invalid email format'),
   password: z
     .string()
