@@ -1,10 +1,13 @@
 import { NestFactory } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module';
 import { QUEUES } from './common/constants/messaging.constants';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+
+  app.useLogger(app.get(Logger));
 
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.RMQ,
@@ -26,8 +29,9 @@ async function bootstrap() {
   const port = process.env.PORT ?? 3002;
   await app.listen(port);
 
-  console.info(`Transactions service running on port ${port}`);
-  console.info(`Transactions microservice consuming from queue: ${QUEUES.TRANSACTIONS}`);
+  const logger = app.get(Logger);
+  logger.log(`Transactions service running on port ${port}`);
+  logger.log(`Transactions microservice consuming from queue: ${QUEUES.TRANSACTIONS}`);
 }
 
 void bootstrap();

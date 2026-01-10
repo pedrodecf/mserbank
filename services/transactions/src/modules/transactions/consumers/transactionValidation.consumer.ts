@@ -1,4 +1,4 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Logger } from '@nestjs/common';
 import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices';
 import { TransactionStatus } from '@prisma/client';
 import { Channel, ConsumeMessage } from 'amqplib';
@@ -9,6 +9,8 @@ import { UpdateTransactionStatusRepository } from '../repositories/updateTransac
 
 @Controller()
 export class TransactionValidationConsumer {
+  private readonly logger = new Logger(TransactionValidationConsumer.name);
+
   constructor(
     private readonly updateTransactionStatusRepository: UpdateTransactionStatusRepository,
   ) {}
@@ -28,7 +30,10 @@ export class TransactionValidationConsumer {
       );
       channel.ack(originalMsg);
     } catch (error) {
-      console.error(`Error processing ${EVENTS.TRANSACTION_VALIDATED} event:`, error);
+      this.logger.error(
+        { err: error, transactionId: data.transactionId, event: EVENTS.TRANSACTION_VALIDATED },
+        'Error processing transaction validated event',
+      );
       channel.nack(originalMsg, false, true);
     }
   }
@@ -46,10 +51,16 @@ export class TransactionValidationConsumer {
         data.transactionId,
         TransactionStatus.FAILED,
       );
-      console.warn(`Transaction ${data.transactionId} rejected: ${data.reason}`);
+      this.logger.warn(
+        { transactionId: data.transactionId, reason: data.reason },
+        'Transaction rejected',
+      );
       channel.ack(originalMsg);
     } catch (error) {
-      console.error(`Error processing ${EVENTS.TRANSACTION_REJECTED} event:`, error);
+      this.logger.error(
+        { err: error, transactionId: data.transactionId, event: EVENTS.TRANSACTION_REJECTED },
+        'Error processing transaction rejected event',
+      );
       channel.nack(originalMsg, false, true);
     }
   }
