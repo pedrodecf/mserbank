@@ -32,6 +32,26 @@
 
 Do NOT introduce new technologies or libraries unless explicitly requested.
 
+## Library Usage & Documentation (Context7)
+
+- Whenever working with any external library, framework, or SDK,
+  always use Context7 as the primary documentation source.
+
+- This rule applies especially (but not limited to):
+  - Zod
+  - Prisma
+  - RabbitMQ integrations for NestJS
+  - Redis clients
+  - Swagger / OpenAPI tools
+  - Any NestJS official or community package
+
+- Do NOT rely on assumptions, memory, or outdated examples.
+- APIs, methods, configurations, and best practices must be validated
+  against Context7 documentation.
+
+- If Context7 information is missing, outdated, or ambiguous,
+  explicitly state the limitation before implementing the solution.
+
 ## Architecture & Design
 - Follow Clean Architecture principles where applicable.
 - Apply SOLID, KISS, DRY, and YAGNI.

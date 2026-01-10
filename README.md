@@ -177,13 +177,17 @@ model BankingDetails {
 ```prisma
 model Transaction {
   id             String            @id @default(uuid())
-  senderUserId   String
-  receiverUserId String
-  amount         Decimal           @db.Decimal(15, 2)
+  senderUserId   String            // ID do usuário que envia
+  receiverUserId String            // ID do usuário que recebe
+  amount         Int               // Valor em centavos (precisão exata)
   description    String?
   status         TransactionStatus @default(PENDING)
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt
+
+  @@index([senderUserId])          // Index para buscar por sender
+  @@index([receiverUserId])        // Index para buscar por receiver
+  @@map("transactions")
 }
 
 enum TransactionStatus {
