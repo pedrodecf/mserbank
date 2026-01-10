@@ -1,6 +1,6 @@
 **Objetivo: Implementar JWT, validações, etc.**
 
-- [ ] T05a - Adicionar autenticação JWT em ambos os microsserviços.
+- [x] T05a - Adicionar autenticação JWT em ambos os microsserviços.
 
 - [ ] T05b - Configurar middlewares de autorização.
 
