@@ -22,7 +22,6 @@ export class UpdateUserRepository {
           },
         }),
       },
-      include: { bankingDetails: true },
     });
   }
 }

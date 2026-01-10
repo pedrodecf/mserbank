@@ -1,24 +1,24 @@
 import { Module } from '@nestjs/common';
 import { FindOneUserController } from './controllers/findOneUser.controller';
+import { UpdateProfilePictureController } from './controllers/updateProfilePicture.controller';
 import { UpdateUserController } from './controllers/updateUser.controller';
-import { UsersController } from './controllers/users.controller';
 import { FindOneUserRepository } from './repositories/findOneUser.repository';
+import { UpdateProfilePictureRepository } from './repositories/updateProfilePicture.repository';
 import { UpdateUserRepository } from './repositories/updateUser.repository';
-import { UsersRepository } from './repositories/users.repository';
 import { FindOneUserService } from './services/findOneUser.service';
+import { UpdateProfilePictureService } from './services/updateProfilePicture.service';
 import { UpdateUserService } from './services/updateUser.service';
-import { UsersService } from './services/users.service';
 
 @Module({
-  controllers: [FindOneUserController, UpdateUserController, UsersController],
+  controllers: [FindOneUserController, UpdateUserController, UpdateProfilePictureController],
   providers: [
     FindOneUserService,
     FindOneUserRepository,
     UpdateUserService,
     UpdateUserRepository,
-    UsersService,
-    UsersRepository,
+    UpdateProfilePictureService,
+    UpdateProfilePictureRepository,
   ],
-  exports: [FindOneUserService, UpdateUserService, UsersService],
+  exports: [FindOneUserService, UpdateUserService, UpdateProfilePictureService],
 })
 export class UsersModule {}
