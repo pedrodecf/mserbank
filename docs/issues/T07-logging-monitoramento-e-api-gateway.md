@@ -4,7 +4,7 @@
 
 - [ ] T07b - Implementar métricas.
 
-- [ ] T07c - Criar API Gateway simples.
+- [x] T07c - Criar API Gateway simples.
 
 - [ ] T07d - Documentar API com Swagger.
 
