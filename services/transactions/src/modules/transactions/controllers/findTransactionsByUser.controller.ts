@@ -1,6 +1,4 @@
-import { Controller, Get, Param, UsePipes } from '@nestjs/common';
-import { ZodValidationPipe } from 'nestjs-zod';
-import { userIdSchema } from '../schemas/userId.schema';
+import { Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe } from '@nestjs/common';
 import { FindTransactionsByUserService } from '../services/findTransactionsByUser.service';
 
 @Controller('transactions')
@@ -8,8 +6,8 @@ export class FindTransactionsByUserController {
   constructor(private readonly findTransactionsByUserService: FindTransactionsByUserService) {}
 
   @Get('user/:userId')
-  @UsePipes(new ZodValidationPipe(userIdSchema))
-  execute(@Param('userId') userId: string) {
+  @HttpCode(HttpStatus.OK)
+  execute(@Param('userId', ParseUUIDPipe) userId: string) {
     return this.findTransactionsByUserService.execute(userId);
   }
 }
