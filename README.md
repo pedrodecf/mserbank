@@ -15,7 +15,7 @@ O projeto consiste em dois microsserviços independentes que se comunicam de for
 |-----------|------------|
 | Framework | NestJS |
 | Linguagem | TypeScript |
-| ORM | Prisma |
+| ORM | Prisma 6 |
 | Validação | Zod |
 | Banco de Dados | PostgreSQL |
 | Cache | Redis |
@@ -33,17 +33,19 @@ mserbank/
 ├── services/
 │   ├── customers/                    # Microsserviço de Clientes
 │   │   ├── src/
+│   │   │   ├── common/
+│   │   │   │   └── constants/        # Constantes (cache, etc)
 │   │   │   ├── modules/
 │   │   │   │   └── users/
-│   │   │   │       ├── controllers/  # Endpoints HTTP
-│   │   │   │       ├── services/     # Lógica de negócio
+│   │   │   │       ├── controllers/  # 1 arquivo por funcionalidade
+│   │   │   │       ├── services/     # 1 arquivo por funcionalidade
+│   │   │   │       ├── repositories/ # 1 arquivo por funcionalidade
 │   │   │   │       ├── dto/          # Data Transfer Objects
 │   │   │   │       └── schemas/      # Validações Zod
 │   │   │   ├── infrastructure/
 │   │   │   │   ├── database/         # Prisma client e config
 │   │   │   │   ├── cache/            # Redis client
 │   │   │   │   └── messaging/        # RabbitMQ producers/consumers
-│   │   │   ├── config/               # Configurações da aplicação
 │   │   │   └── main.ts
 │   │   ├── prisma/
 │   │   │   └── schema.prisma
@@ -144,23 +146,29 @@ Os microsserviços se comunicam através de eventos publicados no RabbitMQ:
 
 ```prisma
 model User {
-  id             String   @id @default(uuid())
+  id             String    @id @default(uuid())
   name           String
-  email          String   @unique
+  email          String    @unique
   address        String?
   profilePicture String?
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  deletedAt      DateTime?                      // Soft delete
 
   bankingDetails BankingDetails?
+
+  @@map("users")
 }
 
 model BankingDetails {
   id            String @id @default(uuid())
   agency        String
   accountNumber String @unique
-  userId        String @unique
-  user          User   @relation(fields: [userId], references: [id])
+
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("banking_details")
 }
 ```
 
