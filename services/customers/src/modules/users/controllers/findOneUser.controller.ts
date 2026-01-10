@@ -1,7 +1,18 @@
-import { Controller, Get, HttpCode, HttpStatus, Param, ParseUUIDPipe } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseUUIDPipe,
+  UseGuards,
+} from '@nestjs/common';
+import { JwtAuthGuard } from '../../../infrastructure/auth/guards/jwt-auth.guard';
+import { OwnershipGuard } from '../../../infrastructure/auth/guards/ownership.guard';
 import { FindOneUserService } from '../services/findOneUser.service';
 
 @Controller('users')
+@UseGuards(JwtAuthGuard, OwnershipGuard)
 export class FindOneUserController {
   constructor(private readonly findOneUserService: FindOneUserService) {}
 
