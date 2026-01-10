@@ -4,11 +4,6 @@ import { UpdateUserDTO } from '../dto/updateUser.dto';
 
 @Injectable()
 export class UsersService {
-  findOne(userId: string) {
-    // TODO: Implement with Prisma
-    return { message: `Get user ${userId}` };
-  }
-
   update(userId: string, updateUserDto: UpdateUserDTO) {
     // TODO: Implement with Prisma
     return { message: `Update user ${userId}`, data: updateUserDto };

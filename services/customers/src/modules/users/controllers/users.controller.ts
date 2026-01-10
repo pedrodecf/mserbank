@@ -1,19 +1,14 @@
-import { Body, Controller, Get, Param, Patch, UsePipes } from '@nestjs/common';
+import { Body, Controller, Param, Patch, UsePipes } from '@nestjs/common';
 import { ZodValidationPipe } from 'nestjs-zod';
+import { UpdateProfilePictureDTO } from '../dto/updateProfilePicture.dto';
 import { UpdateUserDTO } from '../dto/updateUser.dto';
 import { updateProfilePictureSchema } from '../schemas/updateProfilePicture.schema';
 import { updateUserSchema } from '../schemas/updateUser.schema';
 import { UsersService } from '../services/users.service';
-import { UpdateProfilePictureDTO } from '../dto/updateProfilePicture.dto';
 
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
-
-  @Get(':userId')
-  findOne(@Param('userId') userId: string) {
-    return this.usersService.findOne(userId);
-  }
 
   @Patch(':userId')
   @UsePipes(new ZodValidationPipe(updateUserSchema))
