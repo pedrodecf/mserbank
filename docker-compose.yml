@@ -1,0 +1,73 @@
+services:
+  # ==================== DATABASES ====================
+  postgres-customers:
+    image: postgres:16-alpine
+    container_name: mserbank-postgres-customers
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-mserbank}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mserbank123}
+      POSTGRES_DB: ${POSTGRES_CUSTOMERS_DB:-customers}
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres-customers-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U mserbank -d customers']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  postgres-transactions:
+    image: postgres:16-alpine
+    container_name: mserbank-postgres-transactions
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-mserbank}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mserbank123}
+      POSTGRES_DB: ${POSTGRES_TRANSACTIONS_DB:-transactions}
+    ports:
+      - '5433:5432'
+    volumes:
+      - postgres-transactions-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U mserbank -d transactions']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ==================== CACHE ====================
+  redis:
+    image: redis:7-alpine
+    container_name: mserbank-redis
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ==================== MESSAGING ====================
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: mserbank-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-mserbank}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-mserbank123}
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ['CMD', 'rabbitmq-diagnostics', 'check_running']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres-customers-data:
+  postgres-transactions-data:
+  redis-data:
+  rabbitmq-data:
