@@ -7,11 +7,12 @@ import {
   ParseUUIDPipe,
   UseGuards,
 } from '@nestjs/common';
-import { JwtAuthGuard } from '../../../infrastructure/auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../../../infrastructure/auth/guards/jwt-auth.guard';
+import { OwnershipGuard } from '../../../infrastructure/auth/guards/ownership.guard';
 import { FindOneUserService } from '../services/findOneUser.service';
 
 @Controller('users')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, OwnershipGuard)
 export class FindOneUserController {
   constructor(private readonly findOneUserService: FindOneUserService) {}
 

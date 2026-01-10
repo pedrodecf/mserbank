@@ -10,13 +10,14 @@ import {
   UsePipes,
 } from '@nestjs/common';
 import { ZodValidationPipe } from 'nestjs-zod';
-import { JwtAuthGuard } from '../../../infrastructure/auth/jwt-auth.guard';
+import { JwtAuthGuard } from '../../../infrastructure/auth/guards/jwt-auth.guard';
+import { OwnershipGuard } from '../../../infrastructure/auth/guards/ownership.guard';
 import { UpdateUserDTO } from '../dto/updateUser.dto';
 import { updateUserSchema } from '../schemas/updateUser.schema';
 import { UpdateUserService } from '../services/updateUser.service';
 
 @Controller('users')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, OwnershipGuard)
 export class UpdateUserController {
   constructor(private readonly updateUserService: UpdateUserService) {}
 

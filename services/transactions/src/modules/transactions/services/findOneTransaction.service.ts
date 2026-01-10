@@ -5,10 +5,17 @@ import { FindOneTransactionRepository } from '../repositories/findOneTransaction
 export class FindOneTransactionService {
   constructor(private readonly findOneTransactionRepository: FindOneTransactionRepository) {}
 
-  async execute(transactionId: string) {
+  async execute(transactionId: string, currentUserId: string) {
     const transaction = await this.findOneTransactionRepository.execute(transactionId);
 
     if (!transaction) {
+      throw new NotFoundException(`Transaction with ID ${transactionId} not found`);
+    }
+
+    if (
+      transaction.senderUserId !== currentUserId &&
+      transaction.receiverUserId !== currentUserId
+    ) {
       throw new NotFoundException(`Transaction with ID ${transactionId} not found`);
     }
 
