@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, HttpStatus, Param, Patch, UsePipes } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Param, ParseUUIDPipe, Patch, UsePipes } from '@nestjs/common';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { UpdateUserDTO } from '../dto/updateUser.dto';
 import { updateUserSchema } from '../schemas/updateUser.schema';
@@ -11,7 +11,7 @@ export class UpdateUserController {
   @Patch(':userId')
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ZodValidationPipe(updateUserSchema))
-  execute(@Param('userId') userId: string, @Body() data: UpdateUserDTO) {
+  execute(@Param('userId', ParseUUIDPipe) userId: string, @Body() data: UpdateUserDTO) {
     return this.updateUserService.execute(userId, data);
   }
 }
