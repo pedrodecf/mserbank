@@ -40,6 +40,11 @@ export class LoginService {
       throw new UnauthorizedException('Invalid email or password');
     }
 
+    this.logger.log(
+      { userId: user.id, email: user.email },
+      'Password is valid, generating token...',
+    );
+
     const payload: JwtPayload = {
       sub: user.id,
       email: user.email,

@@ -6,7 +6,7 @@
 
 - [x] T07c - Criar API Gateway simples.
 
-- [ ] T07d - Documentar API com Swagger.
+- [x] T07d - Documentar API com Swagger.
 
 ## Referências
 GitHub Issue #7

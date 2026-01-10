@@ -1,5 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module';
 import { QUEUES } from './common/constants/messaging.constants';
@@ -23,6 +24,25 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api');
 
+  const config = new DocumentBuilder()
+    .setTitle('MSERBank Customers API')
+    .setDescription('API for customer management in MSERBank')
+    .setVersion('1.0')
+    .addTag('users', 'User-related operations')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        description: 'Enter JWT token',
+      },
+      'access-token',
+    )
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/docs', app, document);
+
   await app.startAllMicroservices();
 
   const port = process.env.PORT ?? 3001;
@@ -31,6 +51,7 @@ async function bootstrap() {
   const logger = app.get(Logger);
   logger.log(`Customers service running on port ${port}`);
   logger.log(`Customers microservice consuming from queue: ${QUEUES.CUSTOMERS}`);
+  logger.log(`Swagger documentation available at http://localhost:${port}/api/docs`);
 }
 
 void bootstrap();

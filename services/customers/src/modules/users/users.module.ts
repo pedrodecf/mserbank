@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { AuthModule } from '../../infrastructure/auth/auth.module';
 import { MessagingModule } from '../../infrastructure/messaging/messaging.module';
 import { TransactionCreatedConsumer } from './consumers/transactionCreated.consumer';
 import { FindOneUserController } from './controllers/findOneUser.controller';
@@ -19,10 +20,9 @@ import { LoginService } from './services/login.service';
 import { RegisterService } from './services/register.service';
 import { UpdateProfilePictureService } from './services/updateProfilePicture.service';
 import { UpdateUserService } from './services/updateUser.service';
-import { JwtService } from '@nestjs/jwt';
 
 @Module({
-  imports: [MessagingModule],
+  imports: [MessagingModule, AuthModule],
   controllers: [
     FindOneUserController,
     UpdateUserController,
@@ -39,7 +39,6 @@ import { JwtService } from '@nestjs/jwt';
     UpdateProfilePictureService,
     UpdateProfilePictureRepository,
     TransactionValidationProducer,
-    JwtService,
     LoginService,
     FindUserByEmailRepository,
     FindPasswordByUserIdRepository,
