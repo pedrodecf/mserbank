@@ -29,7 +29,7 @@ export class TransactionValidationConsumer {
         TransactionStatus.COMPLETED,
       );
       channel.ack(originalMsg);
-    } catch (error) {
+    } catch (error: unknown) {
       this.logger.error(
         { err: error, transactionId: data.transactionId, event: EVENTS.TRANSACTION_VALIDATED },
         'Error processing transaction validated event',
@@ -56,7 +56,7 @@ export class TransactionValidationConsumer {
         'Transaction rejected',
       );
       channel.ack(originalMsg);
-    } catch (error) {
+    } catch (error: unknown) {
       this.logger.error(
         { err: error, transactionId: data.transactionId, event: EVENTS.TRANSACTION_REJECTED },
         'Error processing transaction rejected event',

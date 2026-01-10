@@ -19,6 +19,7 @@ import { LoginService } from './services/login.service';
 import { RegisterService } from './services/register.service';
 import { UpdateProfilePictureService } from './services/updateProfilePicture.service';
 import { UpdateUserService } from './services/updateUser.service';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [MessagingModule],
@@ -38,6 +39,7 @@ import { UpdateUserService } from './services/updateUser.service';
     UpdateProfilePictureService,
     UpdateProfilePictureRepository,
     TransactionValidationProducer,
+    JwtService,
     LoginService,
     FindUserByEmailRepository,
     FindPasswordByUserIdRepository,
