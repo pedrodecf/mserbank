@@ -9,7 +9,7 @@ async function bootstrap() {
   const port = process.env.PORT ?? 3002;
   await app.listen(port);
 
-  console.log(`Transactions service running on port ${port}`);
+  console.info(`Transactions service running on port ${port}`);
 }
 
 bootstrap();
