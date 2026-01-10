@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { AuthModule } from '../../infrastructure/auth/auth.module';
 import { MessagingModule } from '../../infrastructure/messaging/messaging.module';
 import { TransactionCreatedConsumer } from './consumers/transactionCreated.consumer';
 import { FindOneUserController } from './controllers/findOneUser.controller';
@@ -21,7 +22,7 @@ import { UpdateProfilePictureService } from './services/updateProfilePicture.ser
 import { UpdateUserService } from './services/updateUser.service';
 
 @Module({
-  imports: [MessagingModule],
+  imports: [MessagingModule, AuthModule],
   controllers: [
     FindOneUserController,
     UpdateUserController,

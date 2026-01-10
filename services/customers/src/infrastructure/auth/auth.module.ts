@@ -1,17 +1,34 @@
 import { Module } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { JwtModule, JwtModuleOptions } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { JWT_CONSTANTS } from '../../common/constants/jwt.constants';
+import type { StringValue } from 'ms';
 import { JwtStrategy } from './jwt.strategy';
 
 @Module({
   imports: [
     PassportModule,
-    JwtModule.register({
-      secret: JWT_CONSTANTS.SECRET,
-      signOptions: {
-        expiresIn: '1h',
+    JwtModule.registerAsync({
+      global: true,
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService): JwtModuleOptions => {
+        const secret = configService.get<string>('JWT_SECRET', 'secret-key');
+        const expiresIn = configService.get<string>('JWT_EXPIRES_IN', '1h') as StringValue;
+
+        const finalSecret = secret && secret.trim() !== '' ? secret : 'secret-key';
+
+        if (!finalSecret || finalSecret.trim() === '') {
+          throw new Error('JWT_SECRET must have a value');
+        }
+
+        return {
+          secret: finalSecret,
+          signOptions: {
+            expiresIn,
+          },
+        };
       },
+      inject: [ConfigService],
     }),
   ],
   providers: [JwtStrategy],

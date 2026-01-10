@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { RegisterDTO } from '../dto/register.dto';
@@ -8,6 +8,8 @@ import { FindUserByEmailRepository } from '../repositories/findUserByEmail.repos
 
 @Injectable()
 export class RegisterService {
+  private readonly logger = new Logger(RegisterService.name);
+
   constructor(
     private readonly createUserRepository: CreateUserRepository,
     private readonly createPasswordRepository: CreatePasswordRepository,
@@ -16,9 +18,12 @@ export class RegisterService {
   ) {}
 
   async execute(data: RegisterDTO) {
+    this.logger.debug({ email: data.email }, 'Attempting user registration');
+
     const userAlreadyExists = await this.findUserByEmailRepository.execute(data.email);
 
     if (userAlreadyExists) {
+      this.logger.warn({ email: data.email }, 'Registration failed: email already in use');
       throw new BadRequestException('Email already in use');
     }
 
@@ -27,6 +32,8 @@ export class RegisterService {
     const hashedPassword = await bcrypt.hash(data.password, 10);
 
     await this.createPasswordRepository.execute(user.id, hashedPassword);
+
+    this.logger.log({ userId: user.id, email: user.email }, 'User registered successfully');
 
     return {
       message: 'User created successfully',

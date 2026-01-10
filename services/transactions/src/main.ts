@@ -1,10 +1,14 @@
 import { NestFactory } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module';
 import { QUEUES } from './common/constants/messaging.constants';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+
+  app.useLogger(app.get(Logger));
 
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.RMQ,
@@ -21,13 +25,34 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api');
 
+  const config = new DocumentBuilder()
+    .setTitle('MSERBank Transactions API')
+    .setDescription('API for transaction management in MSERBank')
+    .setVersion('1.0')
+    .addTag('transactions', 'Transaction-related operations')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        description: 'Enter JWT token',
+      },
+      'access-token',
+    )
+    .build();
+
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api/docs', app, document);
+
   await app.startAllMicroservices();
 
   const port = process.env.PORT ?? 3002;
   await app.listen(port);
 
-  console.info(`Transactions service running on port ${port}`);
-  console.info(`Transactions microservice consuming from queue: ${QUEUES.TRANSACTIONS}`);
+  const logger = app.get(Logger);
+  logger.log(`Transactions service running on port ${port}`);
+  logger.log(`Transactions microservice consuming from queue: ${QUEUES.TRANSACTIONS}`);
+  logger.log(`Swagger documentation available at http://localhost:${port}/api/docs`);
 }
 
 void bootstrap();

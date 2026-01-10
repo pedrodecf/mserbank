@@ -1,9 +1,12 @@
 import { Body, Controller, HttpCode, HttpStatus, Post, UsePipes } from '@nestjs/common';
+import { ApiOkResponse, ApiOperation, ApiTags, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { ZodValidationPipe } from 'nestjs-zod';
 import { LoginDTO } from '../../users/dto/login.dto';
 import { loginSchema } from '../../users/schemas/login.schema';
+import { LoginResponseDTO } from '../dto/swagger/loginResponse.dto';
 import { LoginService } from '../services/login.service';
 
+@ApiTags('auth')
 @Controller('users')
 export class LoginController {
   constructor(private readonly loginService: LoginService) {}
@@ -11,6 +14,17 @@ export class LoginController {
   @Post('login')
   @HttpCode(HttpStatus.OK)
   @UsePipes(new ZodValidationPipe(loginSchema))
+  @ApiOperation({
+    summary: 'Authenticate user',
+    description: 'Performs user login and returns a JWT access token along with user data.',
+  })
+  @ApiOkResponse({
+    description: 'Login successful',
+    type: LoginResponseDTO,
+  })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid email or password',
+  })
   execute(@Body() data: LoginDTO) {
     return this.loginService.execute(data);
   }

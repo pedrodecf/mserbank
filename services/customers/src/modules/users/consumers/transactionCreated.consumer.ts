@@ -1,4 +1,4 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Logger } from '@nestjs/common';
 import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices';
 import { Channel, ConsumeMessage } from 'amqplib';
 import { EVENTS } from '../../../common/constants/messaging.constants';
@@ -8,6 +8,8 @@ import { FindOneUserRepository } from '../repositories/findOneUser.repository';
 
 @Controller()
 export class TransactionCreatedConsumer {
+  private readonly logger = new Logger(TransactionCreatedConsumer.name);
+
   constructor(
     private readonly findOneUserRepository: FindOneUserRepository,
     private readonly transactionValidationProducer: TransactionValidationProducer,
@@ -45,7 +47,10 @@ export class TransactionCreatedConsumer {
       this.transactionValidationProducer.emitValidated({ transactionId: data.transactionId });
       channel.ack(originalMsg);
     } catch (error) {
-      console.error(`Error processing ${EVENTS.TRANSACTION_CREATED} event:`, error);
+      this.logger.error(
+        { err: error, transactionId: data.transactionId, event: EVENTS.TRANSACTION_CREATED },
+        'Error processing transaction created event',
+      );
       channel.nack(originalMsg, false, true);
     }
   }
