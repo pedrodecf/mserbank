@@ -1,7 +1,10 @@
 import { Module } from '@nestjs/common';
+import { MessagingModule } from '../../infrastructure/messaging/messaging.module';
+import { TransactionCreatedConsumer } from './consumers/transactionCreated.consumer';
 import { FindOneUserController } from './controllers/findOneUser.controller';
 import { UpdateProfilePictureController } from './controllers/updateProfilePicture.controller';
 import { UpdateUserController } from './controllers/updateUser.controller';
+import { TransactionValidationProducer } from './producers/transactionValidation.producer';
 import { FindOneUserRepository } from './repositories/findOneUser.repository';
 import { UpdateProfilePictureRepository } from './repositories/updateProfilePicture.repository';
 import { UpdateUserRepository } from './repositories/updateUser.repository';
@@ -10,7 +13,13 @@ import { UpdateProfilePictureService } from './services/updateProfilePicture.ser
 import { UpdateUserService } from './services/updateUser.service';
 
 @Module({
-  controllers: [FindOneUserController, UpdateUserController, UpdateProfilePictureController],
+  imports: [MessagingModule],
+  controllers: [
+    FindOneUserController,
+    UpdateUserController,
+    UpdateProfilePictureController,
+    TransactionCreatedConsumer,
+  ],
   providers: [
     FindOneUserService,
     FindOneUserRepository,
@@ -18,6 +27,7 @@ import { UpdateUserService } from './services/updateUser.service';
     UpdateUserRepository,
     UpdateProfilePictureService,
     UpdateProfilePictureRepository,
+    TransactionValidationProducer,
   ],
   exports: [FindOneUserService, UpdateUserService, UpdateProfilePictureService],
 })
