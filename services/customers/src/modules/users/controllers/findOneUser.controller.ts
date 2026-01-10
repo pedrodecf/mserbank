@@ -31,7 +31,8 @@ export class FindOneUserController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Get user by ID',
-    description: 'Returns complete data of a specific user. Requires authentication and the user must be the account owner.',
+    description:
+      'Returns complete data of a specific user. Requires authentication and the user must be the account owner.',
   })
   @ApiParam({
     name: 'userId',

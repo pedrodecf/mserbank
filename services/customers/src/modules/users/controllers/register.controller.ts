@@ -6,7 +6,7 @@ import { RegisterResponseDTO } from '../dto/swagger/registerResponse.dto';
 import { registerSchema } from '../schemas/register.schema';
 import { RegisterService } from '../services/register.service';
 
-@ApiTags('users')
+@ApiTags('auth')
 @Controller('users')
 export class RegisterController {
   constructor(private readonly registerService: RegisterService) {}

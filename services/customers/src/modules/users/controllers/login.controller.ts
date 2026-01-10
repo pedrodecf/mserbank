@@ -3,10 +3,10 @@ import { ApiOkResponse, ApiOperation, ApiTags, ApiUnauthorizedResponse } from '@
 import { ZodValidationPipe } from 'nestjs-zod';
 import { LoginDTO } from '../../users/dto/login.dto';
 import { loginSchema } from '../../users/schemas/login.schema';
-import { LoginService } from '../services/login.service';
 import { LoginResponseDTO } from '../dto/swagger/loginResponse.dto';
+import { LoginService } from '../services/login.service';
 
-@ApiTags('users')
+@ApiTags('auth')
 @Controller('users')
 export class LoginController {
   constructor(private readonly loginService: LoginService) {}

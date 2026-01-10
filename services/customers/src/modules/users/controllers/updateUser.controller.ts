@@ -20,8 +20,8 @@ import {
 import { ZodValidationPipe } from 'nestjs-zod';
 import { JwtAuthGuard } from '../../../infrastructure/auth/guards/jwt-auth.guard';
 import { OwnershipGuard } from '../../../infrastructure/auth/guards/ownership.guard';
-import { UpdateUserDTO } from '../dto/updateUser.dto';
 import { UserResponseDTO } from '../dto/swagger/userResponse.dto';
+import { UpdateUserDTO } from '../dto/updateUser.dto';
 import { updateUserSchema } from '../schemas/updateUser.schema';
 import { UpdateUserService } from '../services/updateUser.service';
 
@@ -37,7 +37,8 @@ export class UpdateUserController {
   @UsePipes(new ZodValidationPipe(updateUserSchema))
   @ApiOperation({
     summary: 'Update user data',
-    description: 'Updates user data. All fields are optional, but at least one must be provided. Requires authentication and the user must be the account owner.',
+    description:
+      'Updates user data. All fields are optional, but at least one must be provided. Requires authentication and the user must be the account owner.',
   })
   @ApiParam({
     name: 'userId',
