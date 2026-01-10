@@ -3,8 +3,8 @@ import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices';
 import { TransactionStatus } from '@prisma/client';
 import { Channel, ConsumeMessage } from 'amqplib';
 import { EVENTS } from '../../../common/constants/messaging.constants';
-import { TransactionRejectedEventDTO } from '../dto/transactionRejectedEvent.dto';
-import { TransactionValidatedEventDTO } from '../dto/transactionValidatedEvent.dto';
+import { TransactionRejectedEventDTO } from '../dto/events/transactionRejectedEvent.dto';
+import { TransactionValidatedEventDTO } from '../dto/events/transactionValidatedEvent.dto';
 import { UpdateTransactionStatusRepository } from '../repositories/updateTransactionStatus.repository';
 
 @Controller()
