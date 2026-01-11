@@ -7,7 +7,6 @@ import {
   ParseUUIDPipe,
   Patch,
   UseGuards,
-  UsePipes,
 } from '@nestjs/common';
 import {
   ApiBearerAuth,
@@ -34,7 +33,6 @@ export class UpdateProfilePictureController {
 
   @Patch(':userId/profile-picture')
   @HttpCode(HttpStatus.OK)
-  @UsePipes(new ZodValidationPipe(updateProfilePictureSchema))
   @ApiOperation({
     summary: 'Update profile picture',
     description:
@@ -52,7 +50,10 @@ export class UpdateProfilePictureController {
   @ApiNotFoundResponse({
     description: 'User not found',
   })
-  execute(@Param('userId', ParseUUIDPipe) userId: string, @Body() data: UpdateProfilePictureDTO) {
+  execute(
+    @Param('userId', ParseUUIDPipe) userId: string,
+    @Body(new ZodValidationPipe(updateProfilePictureSchema)) data: UpdateProfilePictureDTO,
+  ) {
     return this.updateProfilePictureService.execute(userId, data);
   }
 }

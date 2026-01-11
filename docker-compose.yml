@@ -6,12 +6,14 @@ services:
       dockerfile: Dockerfile
     container_name: mserbank-customers
     environment:
-      NODE_ENV: production
-      PORT: 3001
-      DATABASE_URL: postgresql://mserbank:mserbank123@postgres-customers:5432/customers?schema=public
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      RABBITMQ_URL: amqp://mserbank:mserbank123@rabbitmq:5672
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${PORT:-3001}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://mserbank:mserbank123@postgres-customers:5432/customers?schema=public}
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      RABBITMQ_URL: ${RABBITMQ_URL:-amqp://mserbank:mserbank123@rabbitmq:5672}
+      JWT_SECRET: ${JWT_SECRET:-secret-key}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1h}
     ports:
       - '3001:3001'
     depends_on:
@@ -30,10 +32,12 @@ services:
       dockerfile: Dockerfile
     container_name: mserbank-transactions
     environment:
-      NODE_ENV: production
-      PORT: 3002
-      DATABASE_URL: postgresql://mserbank:mserbank123@postgres-transactions:5432/transactions?schema=public
-      RABBITMQ_URL: amqp://mserbank:mserbank123@rabbitmq:5672
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${PORT:-3002}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://mserbank:mserbank123@postgres-transactions:5432/transactions?schema=public}
+      RABBITMQ_URL: ${RABBITMQ_URL:-amqp://mserbank:mserbank123@rabbitmq:5672}
+      JWT_SECRET: ${JWT_SECRET:-secret-key}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1h}
     ports:
       - '3002:3002'
     depends_on:
