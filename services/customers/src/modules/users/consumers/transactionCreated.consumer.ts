@@ -24,6 +24,7 @@ export class TransactionCreatedConsumer {
     const originalMsg = context.getMessage() as ConsumeMessage;
 
     try {
+      this.logger.log({ data }, 'Processing transaction created event');
       const sender = await this.findOneUserRepository.execute(data.senderUserId);
       if (!sender) {
         this.transactionValidationProducer.emitRejected({

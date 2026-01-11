@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards, UsePipes } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
 import {
   ApiBearerAuth,
   ApiCreatedResponse,
@@ -26,7 +26,6 @@ export class CreateTransactionController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  @UsePipes(new ZodValidationPipe(createTransactionSchema))
   @ApiOperation({
     summary: 'Create new transaction',
     description:
@@ -39,7 +38,10 @@ export class CreateTransactionController {
   @ApiForbiddenResponse({
     description: 'You can only create transactions as yourself',
   })
-  execute(@Body() data: CreateTransactionDTO, @CurrentUser() currentUser: CurrentUserPayload) {
+  execute(
+    @Body(new ZodValidationPipe(createTransactionSchema)) data: CreateTransactionDTO,
+    @CurrentUser() currentUser: CurrentUserPayload,
+  ) {
     return this.createTransactionService.execute(data, currentUser.userId);
   }
 }
