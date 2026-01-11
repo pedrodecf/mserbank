@@ -1,6 +1,8 @@
 import { Controller, Logger } from '@nestjs/common';
 import { Ctx, EventPattern, Payload, RmqContext } from '@nestjs/microservices';
 import { Channel, ConsumeMessage } from 'amqplib';
+import { CACHE_PREFIXES } from 'src/common/constants/cache.constants';
+import { RedisService } from 'src/infrastructure/cache/redis.service';
 import { EVENTS } from '../../../common/constants/messaging.constants';
 import { TransactionCreatedEventDTO } from '../dto/events/transactionCreatedEvent.dto';
 import { TransactionValidationProducer } from '../producers/transactionValidation.producer';
@@ -13,6 +15,7 @@ export class TransactionCreatedConsumer {
   constructor(
     private readonly findOneUserRepository: FindOneUserRepository,
     private readonly transactionValidationProducer: TransactionValidationProducer,
+    private readonly redisService: RedisService,
   ) {}
 
   @EventPattern(EVENTS.TRANSACTION_CREATED)
@@ -24,6 +27,7 @@ export class TransactionCreatedConsumer {
     const originalMsg = context.getMessage() as ConsumeMessage;
 
     try {
+      this.logger.log({ data }, 'Processing transaction created event');
       const sender = await this.findOneUserRepository.execute(data.senderUserId);
       if (!sender) {
         this.transactionValidationProducer.emitRejected({
@@ -46,6 +50,17 @@ export class TransactionCreatedConsumer {
 
       this.transactionValidationProducer.emitValidated({ transactionId: data.transactionId });
       channel.ack(originalMsg);
+
+      this.logger.log(
+        { senderUserId: data.senderUserId, receiverUserId: data.receiverUserId },
+        'Deleting users balance from cache...',
+      );
+      await this.redisService.del(`${CACHE_PREFIXES.USER_BALANCE}:${data.senderUserId}`);
+      await this.redisService.del(`${CACHE_PREFIXES.USER_BALANCE}:${data.receiverUserId}`);
+      this.logger.log(
+        { senderUserId: data.senderUserId, receiverUserId: data.receiverUserId },
+        'Users balance deleted from cache',
+      );
     } catch (error) {
       this.logger.error(
         { err: error, transactionId: data.transactionId, event: EVENTS.TRANSACTION_CREATED },

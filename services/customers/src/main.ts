@@ -4,11 +4,15 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module';
 import { QUEUES } from './common/constants/messaging.constants';
+import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { EnvService } from './infrastructure/env/env.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
 
   app.useLogger(app.get(Logger));
+
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   app.connectMicroservice<MicroserviceOptions>({
     transport: Transport.RMQ,
@@ -45,7 +49,10 @@ async function bootstrap() {
 
   await app.startAllMicroservices();
 
-  const port = process.env.PORT ?? 3001;
+  const envService = app.get(EnvService);
+
+  const port = envService.get('PORT');
+
   await app.listen(port);
 
   const logger = app.get(Logger);

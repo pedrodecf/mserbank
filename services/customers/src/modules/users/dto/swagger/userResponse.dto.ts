@@ -18,6 +18,24 @@ class BankingDetailsResponseDTO {
     example: '123456-7',
   })
   accountNumber: string;
+
+  @ApiProperty({
+    description: 'Banking details nickname',
+    example: 'primary account',
+  })
+  nickname: string;
+
+  @ApiProperty({
+    description: 'Banking details created at',
+    example: '2024-01-01T00:00:00.000Z',
+  })
+  createdAt: Date;
+
+  @ApiProperty({
+    description: 'Banking details updated at',
+    example: '2024-01-01T00:00:00.000Z',
+  })
+  updatedAt: Date;
 }
 
 export class UserResponseDTO {
