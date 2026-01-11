@@ -6,7 +6,7 @@
 
 - [x] T06c - Escrever testes para endpoints de transações.
 
-- [ ] T06d - Testes de integração com banco de dados e Redis.
+- [x] T06d - Testes de integração com banco de dados e Redis.
 
 ## Referências
 GitHub Issue #6
