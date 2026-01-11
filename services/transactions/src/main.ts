@@ -5,6 +5,7 @@ import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module';
 import { QUEUES } from './common/constants/messaging.constants';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
+import { EnvService } from './infrastructure/env/env.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
@@ -49,7 +50,10 @@ async function bootstrap() {
 
   await app.startAllMicroservices();
 
-  const port = process.env.PORT ?? 3002;
+  const envService = app.get(EnvService);
+
+  const port = envService.get('PORT');
+
   await app.listen(port);
 
   const logger = app.get(Logger);
