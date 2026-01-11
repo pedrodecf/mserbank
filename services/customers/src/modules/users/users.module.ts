@@ -20,6 +20,7 @@ import { LoginService } from './services/login.service';
 import { RegisterService } from './services/register.service';
 import { UpdateProfilePictureService } from './services/updateProfilePicture.service';
 import { UpdateUserService } from './services/updateUser.service';
+import { CreateBankingDetailsRepository } from './repositories/createBankingDetails.repository';
 
 @Module({
   imports: [MessagingModule, AuthModule],
@@ -45,6 +46,7 @@ import { UpdateUserService } from './services/updateUser.service';
     RegisterService,
     CreateUserRepository,
     CreatePasswordRepository,
+    CreateBankingDetailsRepository,
   ],
   exports: [FindOneUserService, UpdateUserService, UpdateProfilePictureService],
 })

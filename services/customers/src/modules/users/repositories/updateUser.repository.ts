@@ -15,9 +15,8 @@ export class UpdateUserRepository {
         ...userData,
         ...(bankingDetails && {
           bankingDetails: {
-            upsert: {
-              create: bankingDetails,
-              update: bankingDetails,
+            update: {
+              nickname: bankingDetails.nickname,
             },
           },
         }),
