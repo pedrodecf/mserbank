@@ -5,12 +5,15 @@ import { AuthModule } from './infrastructure/auth/auth.module';
 import { DatabaseModule } from './infrastructure/database/database.module';
 import { MessagingModule } from './infrastructure/messaging/messaging.module';
 import { TransactionsModule } from './modules/transactions/transactions.module';
+import { envSchema } from './infrastructure/env/env';
+import { EnvModule } from './infrastructure/env/env.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
+      validate: (env) => envSchema.parse(env),
     }),
     LoggerModule.forRoot({
       pinoHttp: {
@@ -36,6 +39,7 @@ import { TransactionsModule } from './modules/transactions/transactions.module';
         },
       },
     }),
+    EnvModule,
     DatabaseModule,
     MessagingModule,
     AuthModule,
