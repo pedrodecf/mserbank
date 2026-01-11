@@ -1,10 +1,13 @@
 import { Module } from '@nestjs/common';
 import { MessagingModule } from '../../infrastructure/messaging/messaging.module';
+import { CompletedTransactionsRequestedConsumer } from './consumers/completedTransactionsRequested.consumer';
 import { TransactionValidationConsumer } from './consumers/transactionValidation.consumer';
 import { CreateTransactionController } from './controllers/createTransaction.controller';
 import { FindOneTransactionController } from './controllers/findOneTransaction.controller';
 import { FindTransactionsByUserController } from './controllers/findTransactionsByUser.controller';
+import { CompletedTransactionsResponseProducer } from './producers/completedTransactionsResponse.producer';
 import { TransactionCreatedProducer } from './producers/transactionCreated.producer';
+import { FindCompletedTransactionsByUserRepository } from './repositories/findCompletedTransactionsByUser.repository';
 import { CreateTransactionRepository } from './repositories/createTransaction.repository';
 import { FindOneTransactionRepository } from './repositories/findOneTransaction.repository';
 import { FindTransactionsByUserRepository } from './repositories/findTransactionsByUser.repository';
@@ -20,6 +23,7 @@ import { FindTransactionsByUserService } from './services/findTransactionsByUser
     FindOneTransactionController,
     FindTransactionsByUserController,
     TransactionValidationConsumer,
+    CompletedTransactionsRequestedConsumer,
   ],
   providers: [
     CreateTransactionService,
@@ -30,6 +34,8 @@ import { FindTransactionsByUserService } from './services/findTransactionsByUser
     FindTransactionsByUserRepository,
     UpdateTransactionStatusRepository,
     TransactionCreatedProducer,
+    CompletedTransactionsResponseProducer,
+    FindCompletedTransactionsByUserRepository,
   ],
   exports: [CreateTransactionService, FindOneTransactionService, FindTransactionsByUserService],
 })
