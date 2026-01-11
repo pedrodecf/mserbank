@@ -29,8 +29,12 @@ describe('FindOneUserService Integration', () => {
   });
 
   afterAll(async () => {
-    await prisma.$disconnect();
-    await app.close();
+    if (prisma) {
+      await prisma.$disconnect();
+    }
+    if (app) {
+      await app.close();
+    }
   });
 
   beforeEach(async () => {

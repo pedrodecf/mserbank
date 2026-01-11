@@ -6,12 +6,14 @@ services:
       dockerfile: Dockerfile
     container_name: mserbank-customers
     environment:
-      NODE_ENV: production
-      PORT: 3001
-      DATABASE_URL: postgresql://mserbank:mserbank123@postgres-customers:5432/customers?schema=public
-      REDIS_HOST: redis
-      REDIS_PORT: 6379
-      RABBITMQ_URL: amqp://mserbank:mserbank123@rabbitmq:5672
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${PORT:-3001}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://mserbank:mserbank123@postgres-customers:5432/customers?schema=public}
+      REDIS_HOST: ${REDIS_HOST:-redis}
+      REDIS_PORT: ${REDIS_PORT:-6379}
+      RABBITMQ_URL: ${RABBITMQ_URL:-amqp://mserbank:mserbank123@rabbitmq:5672}
+      JWT_SECRET: ${JWT_SECRET:-secret-key}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1h}
     ports:
       - '3001:3001'
     depends_on:
@@ -21,6 +23,8 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+    networks:
+      - mserbank-network
     profiles:
       - full
 
@@ -30,10 +34,12 @@ services:
       dockerfile: Dockerfile
     container_name: mserbank-transactions
     environment:
-      NODE_ENV: production
-      PORT: 3002
-      DATABASE_URL: postgresql://mserbank:mserbank123@postgres-transactions:5432/transactions?schema=public
-      RABBITMQ_URL: amqp://mserbank:mserbank123@rabbitmq:5672
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: ${PORT:-3002}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://mserbank:mserbank123@postgres-transactions:5432/transactions?schema=public}
+      RABBITMQ_URL: ${RABBITMQ_URL:-amqp://mserbank:mserbank123@rabbitmq:5672}
+      JWT_SECRET: ${JWT_SECRET:-secret-key}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-1h}
     ports:
       - '3002:3002'
     depends_on:
@@ -41,6 +47,8 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
+    networks:
+      - mserbank-network
     profiles:
       - full
 
@@ -56,6 +64,8 @@ services:
       - '5432:5432'
     volumes:
       - postgres-customers-data:/var/lib/postgresql/data
+    networks:
+      - mserbank-network
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U mserbank -d customers']
       interval: 10s
@@ -73,6 +83,8 @@ services:
       - '5433:5432'
     volumes:
       - postgres-transactions-data:/var/lib/postgresql/data
+    networks:
+      - mserbank-network
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U mserbank -d transactions']
       interval: 10s
@@ -87,6 +99,8 @@ services:
       - '6379:6379'
     volumes:
       - redis-data:/data
+    networks:
+      - mserbank-network
     healthcheck:
       test: ['CMD', 'redis-cli', 'ping']
       interval: 10s
@@ -105,14 +119,64 @@ services:
       - '15672:15672'
     volumes:
       - rabbitmq-data:/var/lib/rabbitmq
+    networks:
+      - mserbank-network
     healthcheck:
       test: ['CMD', 'rabbitmq-diagnostics', 'check_running']
       interval: 10s
       timeout: 5s
       retries: 5
 
+  # ==================== API GATEWAY (KONG) ====================
+  kong:
+    build:
+      context: ./services/kong
+      dockerfile: Dockerfile
+    container_name: mserbank-kong
+    environment:
+      KONG_DATABASE: 'off'
+      KONG_DECLARATIVE_CONFIG: /kong/declarative/kong.yml
+      KONG_PROXY_LISTEN: '0.0.0.0:8000, 0.0.0.0:8443 ssl'
+      KONG_ADMIN_LISTEN: '0.0.0.0:8001, 0.0.0.0:8444 ssl'
+      KONG_PROXY_ACCESS_LOG: /dev/stdout
+      KONG_ADMIN_ACCESS_LOG: /dev/stdout
+      KONG_PROXY_ERROR_LOG: /dev/stderr
+      KONG_ADMIN_ERROR_LOG: /dev/stderr
+      KONG_LOG_LEVEL: ${KONG_LOG_LEVEL:-notice}
+      KONG_PLUGINS: bundled
+      KONG_TRUSTED_IPS: '0.0.0.0/0,::/0'
+      KONG_REAL_IP_HEADER: 'X-Forwarded-For'
+      KONG_REAL_IP_RECURSIVE: 'on'
+      KONG_NGINX_WORKER_PROCESSES: auto
+      KONG_UPSTREAM_KEEPALIVE_POOL_SIZE: 30
+      KONG_UPSTREAM_KEEPALIVE_MAX_REQUESTS: 100
+      KONG_UPSTREAM_KEEPALIVE_IDLE_TIMEOUT: 60
+    ports:
+      - '8000:8000'
+      - '8443:8443'
+      - '8001:8001'
+      - '8444:8444'
+    networks:
+      - mserbank-network
+    depends_on:
+      - customers
+      - transactions
+    profiles:
+      - full
+    healthcheck:
+      test: ['CMD', 'kong', 'health']
+      interval: 30s
+      timeout: 10s
+      start_period: 10s
+      retries: 3
+    restart: unless-stopped
+
 volumes:
   postgres-customers-data:
   postgres-transactions-data:
   redis-data:
   rabbitmq-data:
+
+networks:
+  mserbank-network:
+    driver: bridge

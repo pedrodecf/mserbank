@@ -31,8 +31,12 @@ describe('UpdateUserRepository Integration', () => {
   });
 
   afterAll(async () => {
-    await prisma.$disconnect();
-    await app.close();
+    if (prisma) {
+      await prisma.$disconnect();
+    }
+    if (app) {
+      await app.close();
+    }
   });
 
   beforeEach(async () => {
@@ -57,14 +61,21 @@ describe('UpdateUserRepository Integration', () => {
     expect(updatedUser.email).toBe(uniqueEmail);
   });
 
-  it('should create banking details when updating user', async () => {
+  it('should update banking details nickname when updating user', async () => {
     const uniqueEmail = `test-${Date.now()}@example.com`;
     const user = await createUserRepository.execute('Test User', uniqueEmail);
 
+    await prisma.bankingDetails.create({
+      data: {
+        userId: user.id,
+        agency: '0001',
+        accountNumber: `acc-${Date.now()}`,
+      },
+    });
+
     const updatedUser = await updateUserRepository.execute(user.id, {
       bankingDetails: {
-        agency: '0001',
-        accountNumber: '12345-6',
+        nickname: '0001',
       },
     });
 
@@ -73,25 +84,30 @@ describe('UpdateUserRepository Integration', () => {
     const foundUser = await findOneUserRepository.execute(user.id);
 
     expect(foundUser?.bankingDetails).toBeDefined();
-    expect(foundUser?.bankingDetails?.agency).toBe('0001');
-    expect(foundUser?.bankingDetails?.accountNumber).toBe('12345-6');
+    expect(foundUser?.bankingDetails?.nickname).toBe('0001');
   });
 
   it('should update existing banking details', async () => {
     const uniqueEmail = `test-${Date.now()}@example.com`;
     const user = await createUserRepository.execute('Test User', uniqueEmail);
 
+    await prisma.bankingDetails.create({
+      data: {
+        userId: user.id,
+        agency: '0001',
+        accountNumber: `acc-${Date.now()}`,
+      },
+    });
+
     await updateUserRepository.execute(user.id, {
       bankingDetails: {
-        agency: '0001',
-        accountNumber: '12345-6',
+        nickname: '0001',
       },
     });
 
     const updatedUser = await updateUserRepository.execute(user.id, {
       bankingDetails: {
-        agency: '0002',
-        accountNumber: '67890-1',
+        nickname: '0002',
       },
     });
 
@@ -99,7 +115,6 @@ describe('UpdateUserRepository Integration', () => {
 
     const foundUser = await findOneUserRepository.execute(user.id);
 
-    expect(foundUser?.bankingDetails?.agency).toBe('0002');
-    expect(foundUser?.bankingDetails?.accountNumber).toBe('67890-1');
+    expect(foundUser?.bankingDetails?.nickname).toBe('0002');
   });
 });

@@ -28,6 +28,10 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api');
 
+  app.getHttpAdapter().get('/api/health/customers', (req, res) => {
+    res.status(200).json({ status: 'ok' });
+  });
+
   const config = new DocumentBuilder()
     .setTitle('MSERBank Customers API')
     .setDescription('API for customer management in MSERBank')

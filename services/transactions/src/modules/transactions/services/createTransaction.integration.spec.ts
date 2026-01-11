@@ -3,17 +3,26 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { TransactionStatus } from '@prisma/client';
 import { AppModule } from '../../../app.module';
 import { PrismaService } from '../../../infrastructure/database/prisma.service';
+import { TransactionCreatedProducer } from '../producers/transactionCreated.producer';
 import { CreateTransactionService } from './createTransaction.service';
 
 describe('CreateTransactionService Integration', () => {
   let app: INestApplication;
   let prisma: PrismaService;
   let createTransactionService: CreateTransactionService;
+  let mockTransactionCreatedProducer: { emit: jest.Mock };
 
   beforeAll(async () => {
+    mockTransactionCreatedProducer = {
+      emit: jest.fn(),
+    };
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(TransactionCreatedProducer)
+      .useValue(mockTransactionCreatedProducer)
+      .compile();
 
     app = moduleFixture.createNestApplication();
     await app.init();
@@ -24,8 +33,12 @@ describe('CreateTransactionService Integration', () => {
   });
 
   afterAll(async () => {
-    await prisma.$disconnect();
-    await app.close();
+    if (prisma) {
+      await prisma.$disconnect();
+    }
+    if (app) {
+      await app.close();
+    }
   });
 
   beforeEach(async () => {
@@ -50,7 +63,6 @@ describe('CreateTransactionService Integration', () => {
     expect(transaction.description).toBe('Test transaction');
     expect(transaction.status).toBe(TransactionStatus.PENDING);
 
-    // Verificar no banco
     const dbTransaction = await prisma.transaction.findUnique({
       where: { id: transaction.id },
     });
@@ -64,7 +76,7 @@ describe('CreateTransactionService Integration', () => {
         {
           senderUserId: 'user-1',
           receiverUserId: 'user-1',
-          amount: 100.5,
+          amount: 1005,
         },
         'user-1',
       ),
@@ -77,7 +89,7 @@ describe('CreateTransactionService Integration', () => {
         {
           senderUserId: 'user-1',
           receiverUserId: 'user-2',
-          amount: 100.5,
+          amount: 1005,
         },
         'user-3',
       ),
