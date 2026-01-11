@@ -4,6 +4,8 @@ import { LoggerModule } from 'nestjs-pino';
 import { AuthModule } from './infrastructure/auth/auth.module';
 import { CacheModule } from './infrastructure/cache/cache.module';
 import { DatabaseModule } from './infrastructure/database/database.module';
+import { envSchema } from './infrastructure/env/env';
+import { EnvModule } from './infrastructure/env/env.module';
 import { MessagingModule } from './infrastructure/messaging/messaging.module';
 import { UsersModule } from './modules/users/users.module';
 
@@ -12,6 +14,7 @@ import { UsersModule } from './modules/users/users.module';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
+      validate: (env) => envSchema.parse(env),
     }),
     LoggerModule.forRoot({
       pinoHttp: {
@@ -37,6 +40,7 @@ import { UsersModule } from './modules/users/users.module';
         },
       },
     }),
+    EnvModule,
     DatabaseModule,
     CacheModule,
     MessagingModule,
