@@ -1,0 +1,318 @@
+# Kong Declarative Configuration for MSERBank
+# This file defines all services, routes, and plugins for the API Gateway
+_format_version: "3.0"
+_transform: true
+
+# ==================== SERVICES & ROUTES ====================
+# Define upstream services and their routes
+
+services:
+  # ========== Customers Microservice ==========
+  - name: customers-service
+    url: http://customers:3001
+    protocol: http
+    connect_timeout: 30000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 3
+    tags:
+      - customers
+      - internal
+
+    routes:
+      # Public routes (no authentication)
+      - name: auth-login
+        paths:
+          - /api/users/login
+        methods:
+          - POST
+        strip_path: false
+        preserve_host: false
+        protocols:
+          - http
+          - https
+        tags:
+          - auth
+          - public
+
+      - name: auth-register
+        paths:
+          - /api/users/register
+        methods:
+          - POST
+        strip_path: false
+        preserve_host: false
+        protocols:
+          - http
+          - https
+        tags:
+          - auth
+          - public
+
+      # Protected routes (JWT required)
+      - name: users-get-by-id
+        paths:
+          - ~/api/users/[a-f0-9-]+$
+        methods:
+          - GET
+        strip_path: false
+        preserve_host: false
+        protocols:
+          - http
+          - https
+        tags:
+          - users
+          - protected
+        plugins:
+          - name: jwt
+            config:
+              uri_param_names:
+                - jwt
+              header_names:
+                - Authorization
+              claims_to_verify:
+                - exp
+
+      - name: users-update
+        paths:
+          - ~/api/users/[a-f0-9-]+$
+        methods:
+          - PATCH
+        strip_path: false
+        preserve_host: false
+        protocols:
+          - http
+          - https
+        tags:
+          - users
+          - protected
+        plugins:
+          - name: jwt
+            config:
+              uri_param_names:
+                - jwt
+              header_names:
+                - Authorization
+              claims_to_verify:
+                - exp
+
+      - name: users-profile-picture
+        paths:
+          - ~/api/users/[a-f0-9-]+/profile-picture$
+        methods:
+          - PATCH
+        strip_path: false
+        preserve_host: false
+        protocols:
+          - http
+          - https
+        tags:
+          - users
+          - protected
+        plugins:
+          - name: jwt
+            config:
+              uri_param_names:
+                - jwt
+              header_names:
+                - Authorization
+              claims_to_verify:
+                - exp
+
+      - name: users-balance
+        paths:
+          - ~/api/users/[a-f0-9-]+/balance$
+        methods:
+          - GET
+        strip_path: false
+        preserve_host: false
+        protocols:
+          - http
+          - https
+        tags:
+          - users
+          - protected
+        plugins:
+          - name: jwt
+            config:
+              uri_param_names:
+                - jwt
+              header_names:
+                - Authorization
+              claims_to_verify:
+                - exp
+
+      # Health check
+      - name: customers-health
+        paths:
+          - /api/health/customers
+        methods:
+          - GET
+        strip_path: false
+        preserve_host: false
+        protocols:
+          - http
+          - https
+        tags:
+          - health
+          - internal
+
+    plugins:
+      - name: cors
+        config:
+          origins:
+            - "*"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - PATCH
+            - DELETE
+            - OPTIONS
+          headers:
+            - Accept
+            - Authorization
+            - Content-Type
+            - X-Request-ID
+          exposed_headers:
+            - X-Request-ID
+          credentials: true
+          max_age: 3600
+
+  # ========== Transactions Microservice ==========
+  - name: transactions-service
+    url: http://transactions:3002
+    protocol: http
+    connect_timeout: 30000
+    write_timeout: 60000
+    read_timeout: 60000
+    retries: 3
+    tags:
+      - transactions
+      - internal
+
+    routes:
+      # Protected routes (JWT required)
+      - name: transactions-create
+        paths:
+          - /api/transactions
+        methods:
+          - POST
+        strip_path: false
+        preserve_host: false
+        protocols:
+          - http
+          - https
+        tags:
+          - transactions
+          - protected
+        plugins:
+          - name: jwt
+            config:
+              uri_param_names:
+                - jwt
+              header_names:
+                - Authorization
+              claims_to_verify:
+                - exp
+
+      - name: transactions-get-by-id
+        paths:
+          - ~/api/transactions/[a-f0-9-]+$
+        methods:
+          - GET
+        strip_path: false
+        preserve_host: false
+        protocols:
+          - http
+          - https
+        tags:
+          - transactions
+          - protected
+        plugins:
+          - name: jwt
+            config:
+              uri_param_names:
+                - jwt
+              header_names:
+                - Authorization
+              claims_to_verify:
+                - exp
+
+      - name: transactions-by-user
+        paths:
+          - ~/api/transactions/user/[a-f0-9-]+$
+        methods:
+          - GET
+        strip_path: false
+        preserve_host: false
+        protocols:
+          - http
+          - https
+        tags:
+          - transactions
+          - protected
+        plugins:
+          - name: jwt
+            config:
+              uri_param_names:
+                - jwt
+              header_names:
+                - Authorization
+              claims_to_verify:
+                - exp
+
+      # Health check
+      - name: transactions-health
+        paths:
+          - /api/health/transactions
+        methods:
+          - GET
+        strip_path: false
+        preserve_host: false
+        protocols:
+          - http
+          - https
+        tags:
+          - health
+          - internal
+
+    plugins:
+      - name: cors
+        config:
+          origins:
+            - "*"
+          methods:
+            - GET
+            - POST
+            - PUT
+            - PATCH
+            - DELETE
+            - OPTIONS
+          headers:
+            - Accept
+            - Authorization
+            - Content-Type
+            - X-Request-ID
+          exposed_headers:
+            - X-Request-ID
+          credentials: true
+          max_age: 3600
+
+# ==================== GLOBAL PLUGINS ====================
+# Plugins applied to all services and routes
+
+plugins:
+  # Global Rate Limiting
+  - name: rate-limiting
+    config:
+      minute: 100
+      hour: 5000
+      policy: local
+      fault_tolerant: true
+
+  # Global Request Size Limiting
+  - name: request-size-limiting
+    config:
+      allowed_payload_size: 10
+      size_unit: megabytes

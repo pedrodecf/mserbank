@@ -28,7 +28,7 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api');
 
-  app.getHttpAdapter().get('/health', (req, res) => {
+  app.getHttpAdapter().get('/api/health/customers', (req, res) => {
     res.status(200).json({ status: 'ok' });
   });
 
