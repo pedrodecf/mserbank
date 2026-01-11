@@ -3,6 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Test, TestingModule } from '@nestjs/testing';
 import { User } from '@prisma/client';
 import { RegisterDTO } from '../dto/register.dto';
+import { CreateBankingDetailsRepository } from '../repositories/createBankingDetails.repository';
 import { CreatePasswordRepository } from '../repositories/createPassword.repository';
 import { CreateUserRepository } from '../repositories/createUser.repository';
 import { FindUserByEmailRepository } from '../repositories/findUserByEmail.repository';
@@ -13,6 +14,7 @@ describe('RegisterService', () => {
   let mockCreateUserRepository: { execute: jest.Mock };
   let mockCreatePasswordRepository: { execute: jest.Mock };
   let mockFindUserByEmailRepository: { execute: jest.Mock };
+  let mockCreateBankingDetailsRepository: { execute: jest.Mock };
 
   const mockUser: User = {
     id: 'user-123',
@@ -44,6 +46,10 @@ describe('RegisterService', () => {
       execute: jest.fn(),
     };
 
+    mockCreateBankingDetailsRepository = {
+      execute: jest.fn(),
+    };
+
     const mockJwtService = {
       sign: jest.fn(),
     };
@@ -62,6 +68,10 @@ describe('RegisterService', () => {
         {
           provide: FindUserByEmailRepository,
           useValue: mockFindUserByEmailRepository,
+        },
+        {
+          provide: CreateBankingDetailsRepository,
+          useValue: mockCreateBankingDetailsRepository,
         },
         {
           provide: JwtService,
@@ -90,6 +100,15 @@ describe('RegisterService', () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     });
+    mockCreateBankingDetailsRepository.execute.mockResolvedValue({
+      id: 'banking-123',
+      userId: 'user-123',
+      agency: '1234',
+      accountNumber: '1234567890',
+      nickname: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    });
 
     const result = await service.execute(mockRegisterDTO);
 
@@ -100,6 +119,7 @@ describe('RegisterService', () => {
       mockRegisterDTO.email,
     );
     expect(mockCreatePasswordRepository.execute).toHaveBeenCalled();
+    expect(mockCreateBankingDetailsRepository.execute).toHaveBeenCalled();
   });
 
   it('should throw BadRequestException when email already exists', async () => {
@@ -109,5 +129,6 @@ describe('RegisterService', () => {
     expect(mockFindUserByEmailRepository.execute).toHaveBeenCalledWith(mockRegisterDTO.email);
     expect(mockCreateUserRepository.execute).not.toHaveBeenCalled();
     expect(mockCreatePasswordRepository.execute).not.toHaveBeenCalled();
+    expect(mockCreateBankingDetailsRepository.execute).not.toHaveBeenCalled();
   });
 });
